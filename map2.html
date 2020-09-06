@@ -1,0 +1,360 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+		<meta name="description" content="">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<!-- The above 4 meta tags *must* come first in the head; any other head content must come *after* these tags-->
+		<!-- Title-->
+		<title>  二期地图</title>
+		<!-- Favicon-->
+		<link rel="icon" href="img/core-img/favicon.ico">
+		<!-- Stylesheet-->
+		<link rel="stylesheet" href="style.css">
+		<style>
+			html,body{
+						overflow: hidden;
+						height: 100%;
+					}
+				</style>
+	</head>
+	<body>
+		<!--Preloader
+				<div class="preloader" id="preloader">
+					<div class="spinner-grow text-secondary" role="status">
+						<div class="sr-only"> 加载中...</div>
+					</div>
+				</div-->
+		<!-- Header Area-->
+		<div class="header-area" id="headerArea">
+			<div class="container h-100 d-flex align-items-center justify-content-between">
+				<!-- Back Button-->
+				<div class="back-button"><a href="index.html"><i class="lni lni-arrow-left"></i></a></div>
+				<!-- Page Title-->
+				<div class="page-heading">
+					<h5 class="mb-0">二期地图</h5>
+				</div>
+				<!-- Navbar Toggler-->
+				<div><span></span><span></span><span></span></div>
+			</div>
+		</div>
+		<div style="height: 100%;">
+			<div class="page-content-wrapper">
+				<div style="font-size: larger;color: black;background-color: white;border-radius: 0.5rem;padding:0.3125rem;margin-top: 0.3125rem;margin-left: 0.3125rem;float: left;">
+					单指拖拽，双指放大</div>
+				<div id="scale">
+					<img id="img1" src="./assert/map2.png" alt="" style="padding-top: 50%;">
+				</div>
+			</div>
+		</div>
+		<script src="js/hammer.min.js"></script>
+		<script type="text/javascript">
+			function point2D(x, y) {
+				return {
+					x: x,
+					y: y
+				};
+			}
+
+			var reqAnimationFrame = (function() {
+				return window[Hammer.prefixed(window, 'requestAnimationFrame')] || function(callback) {
+					window.setTimeout(callback, 1000 / 60);
+				};
+			})();
+
+
+			var tMatrix = [1, 0, 0, 1, 0, 0] //x缩放，无，无，y缩放，x平移，y平移
+
+			var initScale = 1; //初始化scale
+			var el = document.getElementById("img1"); //获取元素
+			var mc = new Hammer.Manager(el)
+			var ticking = false
+			var poscenter = point2D(0, 0); //缓存双指的中心坐标
+			var duration = ''; //设置过渡效果，用于双击缩放效果
+			var lastTranslate = point2D(0, 0); //记录上次的偏移值
+			var lastcenter = point2D(el.offsetWidth / 2, el.offsetHeight / 2) //图像的中心点，用于对比双指中心点
+
+			var center = lastcenter
+			mc.add(new Hammer.Pan({
+				threshold: 0,
+				pointers: 1
+			}))
+			mc.add(new Hammer.Pinch({
+				threshold: 0
+			}))
+			mc.add(new Hammer.Tap({
+				event: 'doubletap',
+				taps: 2
+			}));
+			mc.on("panmove", onPan);
+			mc.on("panstart", onPanStart)
+			mc.on("pinchmove", onPinch);
+			mc.on("pinchstart", onPinchStart);
+			mc.on("doubletap", onDoubleTap);
+			mc.on("pinchend", onPinchEnd);
+
+			function onPanStart(ev) {
+				lastTranslate = point2D(tMatrix[4], tMatrix[5]) //缓存上一次的偏移值
+			}
+
+			function onPinchEnd(ev) {
+				var nowScale = tMatrix[0];
+				//最大放大倍数
+				var maxScale = 4;
+				//如果现在放大倍数大于最大放大倍数
+				if (nowScale > maxScale) {
+					tMatrix[0] = tMatrix[3] = maxScale
+				}
+				requestElementUpdate('pinchend');
+			}
+
+			function onPan(ev) {
+				duration = ''
+				el.className = ''
+				tMatrix[4] = lastTranslate.x + ev.deltaX
+				tMatrix[5] = lastTranslate.y + ev.deltaY
+				requestElementUpdate('onpan');
+
+			}
+
+			function onPinchStart(ev) {
+				duration = '';
+				lastTranslate = point2D(tMatrix[4], tMatrix[5]) //记录上一次的偏移值
+				initScale = tMatrix[0] || 1;
+				poscenter = point2D(ev.center.x, ev.center.y)
+
+				lastcenter = point2D(center.x + lastTranslate.x, center.y + lastTranslate.y) //重新计算放大后的中心坐标
+				poscenter = point2D(ev.center.x - lastcenter.x, ev.center.y - lastcenter.y)
+				console.log("center", lastcenter.x, lastcenter.y)
+
+				requestElementUpdate('onpinchStart');
+			}
+
+			function onPinch(ev) {
+				var nowScale = tMatrix[0] = tMatrix[3] = initScale * ev.scale;
+				var composscal = (1 - ev.scale)
+				//tMatrix[4] = poscenter.x - ((poscenter.x - lastcenter.x) *  ev.scale + lastcenter.x)  + lastTranslate.x//最后加上上一次的偏移值
+				//tMatrix[5] = poscenter.y - ((poscenter.y - lastcenter.y) *  ev.scale + lastcenter.y)  + lastTranslate.y
+				tMatrix[4] = (1 - ev.scale) * poscenter.x + lastTranslate.x
+				tMatrix[5] = (1 - ev.scale) * poscenter.y + lastTranslate.y
+				requestElementUpdate('onpinch');
+			}
+
+			function onDoubleTap(ev) {
+				duration = ".3s ease all";
+				var nowScale = tMatrix[0];
+				if (nowScale != 1 || tMatrix[4] != 0) {
+					//scale不等于1，要重回1
+					tMatrix[0] = tMatrix[3] = 1;
+					tMatrix[4] = tMatrix[5] = 0;
+				} else {
+					var pointer = ev.center
+					var scale = 2
+					tMatrix[0] = tMatrix[3] = scale
+					//var last = point2D
+					//tMatrix[4] = pointer.x - ((pointer.x-lastcenter.x) * scale + lastcenter.x);
+					//tMatrix[5] = pointer.y - ((pointer.y-lastcenter.y) * scale + lastcenter.y);
+					tMatrix[4] = (1 - scale) * (pointer.x - center.x)
+					tMatrix[5] = (1 - scale) * (pointer.y - center.y)
+				}
+				requestElementUpdate('doubleTap');
+			}
+
+			function updateElementTransform() {
+				el.style.transition = duration
+				var tmp = tMatrix.join(',')
+				console.log(tmp)
+				el.style.transform = 'matrix(' + tmp + ')';
+				ticking = false;
+			}
+
+			function requestElementUpdate() {
+				arguments && console.log(arguments[0])
+
+				if (!ticking) {
+					reqAnimationFrame(updateElementTransform);
+					ticking = true;
+				}
+			}
+
+			/**
+			初始化设置
+			*/
+
+			requestElementUpdate();
+		</script>
+	</body>
+</html>
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1,user-scalable=no">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<title>二期地图</title>
+		<link rel="stylesheet" href="../css/mui.min.css" />
+		<style type="text/css" media="screen">
+			body {
+				background: #eee;
+				margin: 0;
+				text-align: center;
+				min-height: 100%;
+			}
+
+			canvas {
+				display: block;
+				margin: 0 auto;
+				background: #fff;
+				border: 1px solid #ccc
+			}
+		</style>
+	</head>
+	<body>
+		<header id="header" class="mui-bar mui-bar-nav">
+			<a class="mui-icon mui-icon-left-nav mui-pull-left" href="../index.html"></a>
+			<h1 class="mui-title"> 二期地图</h1>
+		</header>
+		<canvas></canvas>
+		<script type="text/javascript" charset="utf-8">
+			var canvas = document.getElementsByTagName('canvas')[0];
+			canvas.width = document.body.clientWidth;
+			canvas.height = window.screen.availHeight;
+			var gkhead = new Image;
+			var ball = new Image;
+			window.onload = function() {
+				var ctx = canvas.getContext('2d');
+				trackTransforms(ctx);
+
+				function redraw() {
+					// Clear the entire canvas
+					var p1 = ctx.transformedPoint(0, 0);
+					var p2 = ctx.transformedPoint(canvas.width, canvas.height);
+					ctx.clearRect(p1.x, p1.y, p2.x - p1.x, p2.y - p1.y);
+
+					// Alternatively:
+					// ctx.save();
+					// ctx.setTransform(1,0,0,1,0,0);
+					// ctx.clearRect(0,0,canvas.width,canvas.height);
+					// ctx.restore();
+
+					ctx.drawImage(gkhead, -1300, -500);
+				}
+				redraw();
+
+				var lastX = canvas.width / 2,
+					lastY = canvas.height / 2;
+				var dragStart, dragged;
+				canvas.addEventListener('mousedown', function(evt) {
+					document.body.style.mozUserSelect = document.body.style.webkitUserSelect = document.body.style.userSelect =
+						'none';
+					lastX = evt.offsetX || (evt.pageX - canvas.offsetLeft);
+					lastY = evt.offsetY || (evt.pageY - canvas.offsetTop);
+					dragStart = ctx.transformedPoint(lastX, lastY);
+					dragged = false;
+				}, false);
+				canvas.addEventListener('mousemove', function(evt) {
+					lastX = evt.offsetX || (evt.pageX - canvas.offsetLeft);
+					lastY = evt.offsetY || (evt.pageY - canvas.offsetTop);
+					dragged = true;
+					if (dragStart) {
+						var pt = ctx.transformedPoint(lastX, lastY);
+						ctx.translate(pt.x - dragStart.x, pt.y - dragStart.y);
+						redraw();
+					}
+				}, false);
+				canvas.addEventListener('mouseup', function(evt) {
+					dragStart = null;
+					if (!dragged) zoom(evt.shiftKey ? -1 : 1);
+				}, false);
+
+				var scaleFactor = 1.1;
+				var zoom = function(clicks) {
+					var pt = ctx.transformedPoint(lastX, lastY);
+					ctx.translate(pt.x, pt.y);
+					var factor = Math.pow(scaleFactor, clicks);
+					ctx.scale(factor, factor);
+					ctx.translate(-pt.x, -pt.y);
+					redraw();
+				}
+
+				var handleScroll = function(evt) {
+					var delta = evt.wheelDelta ? evt.wheelDelta / 40 : evt.detail ? -evt.detail : 0;
+					if (delta) zoom(delta);
+					return evt.preventDefault() && false;
+				};
+				canvas.addEventListener('DOMMouseScroll', handleScroll, false);
+				canvas.addEventListener('mousewheel', handleScroll, false);
+			};
+			gkhead.src = '../asserts/map2.png';
+
+			// Adds ctx.getTransform() - returns an SVGMatrix
+			// Adds ctx.transformedPoint(x,y) - returns an SVGPoint
+			function trackTransforms(ctx) {
+				var svg = document.createElementNS("http://www.w3.org/2000/svg", 'svg');
+				var xform = svg.createSVGMatrix();
+				ctx.getTransform = function() {
+					return xform;
+				};
+
+				var savedTransforms = [];
+				var save = ctx.save;
+				ctx.save = function() {
+					savedTransforms.push(xform.translate(0, 0));
+					return save.call(ctx);
+				};
+				var restore = ctx.restore;
+				ctx.restore = function() {
+					xform = savedTransforms.pop();
+					return restore.call(ctx);
+				};
+
+				var scale = ctx.scale;
+				ctx.scale = function(sx, sy) {
+					xform = xform.scaleNonUniform(sx, sy);
+					return scale.call(ctx, sx, sy);
+				};
+				var rotate = ctx.rotate;
+				ctx.rotate = function(radians) {
+					xform = xform.rotate(radians * 180 / Math.PI);
+					return rotate.call(ctx, radians);
+				};
+				var translate = ctx.translate;
+				ctx.translate = function(dx, dy) {
+					xform = xform.translate(dx, dy);
+					return translate.call(ctx, dx, dy);
+				};
+				var transform = ctx.transform;
+				ctx.transform = function(a, b, c, d, e, f) {
+					var m2 = svg.createSVGMatrix();
+					m2.a = a;
+					m2.b = b;
+					m2.c = c;
+					m2.d = d;
+					m2.e = e;
+					m2.f = f;
+					xform = xform.multiply(m2);
+					return transform.call(ctx, a, b, c, d, e, f);
+				};
+				var setTransform = ctx.setTransform;
+				ctx.setTransform = function(a, b, c, d, e, f) {
+					xform.a = a;
+					xform.b = b;
+					xform.c = c;
+					xform.d = d;
+					xform.e = e;
+					xform.f = f;
+					return setTransform.call(ctx, a, b, c, d, e, f);
+				};
+				var pt = svg.createSVGPoint();
+				ctx.transformedPoint = function(x, y) {
+					pt.x = x;
+					pt.y = y;
+					return pt.matrixTransform(xform.inverse());
+				}
+			}
+		</script>
+		<script src="js/default/dark-mode-switch.js"></script>
+	</body>
+</html>

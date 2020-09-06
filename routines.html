@@ -1,0 +1,99 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+		<meta name="description" content="">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<!-- The above 4 meta tags *must* come first in the head; any other head content must come *after* these tags-->
+		<!-- Title-->
+		<title>  路线图</title>
+		<!-- Favicon-->
+		<link rel="icon" href="img/core-img/favicon.ico">
+		<!-- Stylesheet-->
+		<link rel="stylesheet" href="style.css">
+		<link rel="stylesheet" href="css/jquery.fs.zoomer.css" type="text/css" media="all" />
+		<style>
+			.zoomer_wrapper { border: 1px solid #ddd; border-radius: 3px; height:18.75rem;overflow:hidden;}*/
+			.zoomer.dark_zoomer img { box-shadow: 0 0 5px rgba(0, 0, 0, 0.5); }
+		</style>
+
+	</head>
+	<body>
+		<!--Preloader
+						<div class="preloader" id="preloader">
+							<div class="spinner-grow text-secondary" role="status">
+								<div class="sr-only"> 加载中...</div>
+							</div>
+						</div-->
+		<!-- Header Area-->
+		<div class="header-area" id="headerArea">
+			<div class="container h-100 d-flex align-items-center justify-content-between">
+				<!-- Back Button-->
+				<div class="back-button"><a href="index.html"><i class="lni lni-arrow-left"></i></a></div>
+				<!-- Page Title-->
+				<div class="page-heading">
+					<h5 class="mb-0">路线图</h5>
+				</div>
+				<!-- Navbar Toggler-->
+				<div><span></span><span></span><span></span></div>
+			</div>
+		</div>
+		<div class="page-content-wrapper">
+			<p style="margin: 10px 15px 20px; background-color: white;border-radius: 0.5rem;padding: 0.3125rem;box-shadow: gray; font-size: larger;">
+				<i class="fa fa-info-circle" aria-hidden="true"></i>
+				本线路图显示的是由大连地铁、大连快轨组成的公共交通线路。<br>
+			</p>
+			<h6 style="margin-left: 0.3125rem;font-family: 'arial rounded mt bold';"><b>大连站至大连交通大学旅顺校区</b></h6>
+			<p style="margin: 10px 15px 20px; background-color: white;border-radius: 0.5rem;padding: 0.3125rem;color: #000000;box-shadow: gray;font-size: large;">
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				大连站至旅顺校区，
+				由大连站南广场出站口步行约300米到达地铁友好广场车站D出口，
+				乘坐地铁2号线到达西安路车站，
+				换乘地铁1号线至河口车站，
+				河口站同台换乘地铁12号线到达铁山车站，
+				换乘18路、212路公交航运学院车站下车步行约200米到达旅顺校区。
+			</p>
+			<div class="zoomer_wrapper zoomer_basic">
+				<img src="assert/r1.png" />
+			</div>
+			<br><br>
+			<h6 style="margin-left: 0.3125rem;font-family: 'arial rounded mt bold';"><b>大连北站至大连交通大学旅顺校区</b></h6>
+			<p style="margin: 10px 15px 20px; background-color: white;border-radius: 0.5rem;padding: 0.3125rem;color: #000000;box-shadow: gray;font-size: large;">
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				大连北站至旅顺校区，
+				可在大连北站乘坐地铁1号线至河口车站，
+				河口站同台换乘地铁12号线到达铁山车站，
+				换乘18路、212路公交航运学院车站下车步行约200米到达旅顺校区。
+			</p>
+			<div class="zoomer_wrapper zoomer_basic">
+				<img src="assert/r2.png" />
+			</div>
+			<br><br>
+			<h6 style="margin-left: 0.3125rem;font-family: 'arial rounded mt bold';"><b>大连周水子国际机场站至大连交通大学旅顺校区</b></h6>
+			<p style="margin: 10px 15px 20px; background-color: white;border-radius: 0.5rem;padding: 0.3125rem;color: #000000;box-shadow: gray;font-size: large;">
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				大连机场至旅顺校区，
+				可在大连国际机场乘坐地铁2号线到达西安路车站，
+				换乘地铁1号线至河口车站，
+				河口站同台换乘地铁12号线到达铁山车站，
+				换乘18路、212路公交航运学院车站下车步行约200米到达旅顺校区。
+			</p>
+			<div class="zoomer_wrapper zoomer_basic">
+				<img src="assert/r3.png" />
+			</div>
+			<br>
+			<br>
+			<p align="center">--到这里就结束了--</p>
+			<br>
+		</div>
+		<script src="js/default/dark-mode-switch.js"></script>
+		<script type="text/javascript" src="js/jquery.min.js"></script>
+		<script type="text/javascript" src="js/jquery.fs.zoomer.js"></script>
+		<script>
+			$(document).ready(function() {
+				$(".zoomer_basic").zoomer();
+			});
+		</script>
+	</body>
+</html>
